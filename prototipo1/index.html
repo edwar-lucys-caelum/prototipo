@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KALI-OPS | Suite Táctica de Pentesting</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js for real PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+    <div id="app">
+        
+        <!-- 1. SECCIÓN DE LOGIN -->
+        <section id="login-section" class="active">
+            <div class="glass-panel" style="width: 500px; text-align: center;">
+                <div class="terminal-header">
+                    <div class="status-dots">
+                        <span class="dot-red"></span>
+                        <span class="dot-yellow"></span>
+                        <span class="dot-green"></span>
+                    </div>
+                    <div style="font-size: 0.7rem; opacity: 0.5;">ACCESO SEGURO v2.1.0</div>
+                </div>
+                <h1 class="text-neon mb-20">AUTENTICACIÓN</h1>
+                <p style="font-size: 0.9rem; margin-bottom: 25px;">[!] Permisos root requeridos (Kali Linux)</p>
+                <div style="text-align: left; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 4px;">
+                    <label style="font-size: 0.7rem; color: var(--clr-primary);">CONTRASEÑA ROOT:</label>
+                    <input type="password" id="password-input" class="input-field" placeholder="CLAVE: kali" autofocus>
+                </div>
+                <p id="login-error" class="hidden" style="color: var(--clr-danger); margin-top: 15px;">[ERROR] Credenciales no válidas</p>
+                <button id="login-btn" class="btn-cyber mt-30" style="width: 100%;">Inicializar Sesión</button>
+            </div>
+        </section>
+
+        <!-- 2. MENÚ PRINCIPAL -->
+        <section id="menu-section">
+            <div style="text-align: center; margin-bottom: 50px;">
+                <h1 class="text-neon" style="font-size: 2.5rem;">PANEL DE CONTROL TÁCTICO</h1>
+                <p style="letter-spacing: 5px; opacity: 0.5;">MÓDULO DE PENTESTING LISTO</p>
+            </div>
+            
+            <div class="menu-grid">
+                <div class="menu-card" onclick="showView('basic-scan-section')">
+                    <span class="icon text-neon">01</span>
+                    <h2>ESCANEO BÁSICO</h2>
+                    <p>Reconocimiento rápido. Solo puertos y servicios activos.</p>
+                </div>
+                <div class="menu-card" style="border-left-color: var(--clr-secondary);" onclick="showView('advanced-scan-section')">
+                    <span class="icon text-cyan">02</span>
+                    <h2>ESCANEO AVANZADO</h2>
+                    <p>Análisis de vulnerabilidades profundo. CVEs y criticidad.</p>
+                </div>
+                <div class="menu-card" style="border-left-color: var(--clr-text-dim); opacity: 0.6;" onclick="showView('other-options-section')">
+                    <span class="icon">03</span>
+                    <h2>OTRAS OPCIONES</h2>
+                    <p>Herramientas futuras y configuración del sistema.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ESCANEO BÁSICO -->
+        <section id="basic-scan-section">
+            <div class="glass-panel" style="width: 700px;">
+                <h2 class="text-neon">[ RECONOCIMIENTO ]</h2>
+                <p class="mb-20">ESCÁNER DE PUERTOS ESTÁNDAR</p>
+                
+                <div style="background: rgba(0,0,0,0.3); padding: 30px;">
+                    <label style="font-size: 0.7rem; color: var(--clr-primary);">IP O SITIO OBJETIVO:</label>
+                    <input type="text" id="target-ip-basic" class="input-field" value="192.168.18.2">
+                    <p style="font-size: 0.7rem; opacity: 0.5; margin-top: 5px;">* Prototipo restringido a IP 192.168.18.2</p>
+                    <button class="btn-cyber mt-30" onclick="startScan('basic')">EJECUTAR ESCANEO</button>
+                </div>
+
+                <div id="basic-loading" class="hidden">
+                    <div class="cyber-loader"><div></div><div></div></div>
+                    <p style="text-align: center;" class="text-neon animation-blink">SONDEANDO PUERTOS...</p>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="#" class="text-cyan" style="font-size: 0.8rem;" onclick="showView('menu-section')">Abortar Misión</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ESCANEO AVANZADO -->
+        <section id="advanced-scan-section">
+            <div class="glass-panel" style="width: 800px;">
+                <h2 class="text-cyan">[ ANÁLISIS DE VULN ]</h2>
+                <p class="mb-20">IDENTIFICACIÓN PROFUNDA DE SEGURIDAD</p>
+                
+                <div style="background: rgba(10,30,50,0.2); padding: 30px; border: 1px solid rgba(0,136,255,0.2);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label style="font-size: 0.7rem; color: var(--clr-secondary);">OBJETIVO:</label>
+                            <input type="text" id="target-ip-advanced" class="input-field" value="192.168.18.2" style="border-color: rgba(0,136,255,0.3);">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.7rem; color: var(--clr-secondary);">INTENSIDAD:</label>
+                            <select id="scan-speed" class="input-field" style="border-color: rgba(0,136,255,0.3);">
+                                <option value="sigiloso">Sigiloso (Wait: 10s)</option>
+                                <option value="mediano" selected>Mediano (Default)</option>
+                                <option value="agresivo">Agresivo (Flood)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Configuración Avanzada Restaurada -->
+                    <details class="mt-30" style="color: var(--clr-secondary); font-size: 0.8rem; cursor: pointer;">
+                        <summary>Configuración de Red Avanzada</summary>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-top: 15px;">
+                            <div>
+                                <label>Protocolo:</label>
+                                <select id="scan-type" class="input-field" style="font-size: 0.8rem; border-color: rgba(0,136,255,0.2);">
+                                    <option value="TCP">TCP Connect</option>
+                                    <option value="UDP">UDP Scan</option>
+                                    <option value="SYN" selected>SYN Stealth</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Puertos:</label>
+                                <select id="scan-ports" class="input-field" style="font-size: 0.8rem; border-color: rgba(0,136,255,0.2);">
+                                    <option value="100">Top 100</option>
+                                    <option value="500">Top 500</option>
+                                    <option value="all">Todos (65535)</option>
+                                </select>
+                            </div>
+                            <div style="grid-column: span 2;">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    Fragmentar Paquetes (Evadir IDS)
+                                    <input type="checkbox" id="scan-frag">
+                                </label>
+                            </div>
+                        </div>
+                    </details>
+                    
+                    <button class="btn-cyber secondary mt-30" style="width: 100%;" onclick="startScan('advanced')">INICIALIZAR ANÁLISIS PROFUNDO</button>
+                </div>
+
+                <div id="advanced-loading" class="hidden">
+                    <div class="cyber-loader"><div></div><div style="border-top-color: var(--clr-secondary);"></div></div>
+                    <p style="text-align: center;" class="text-cyan">EXPLOTANDO OBJETIVO Y CORRELACIONANDO CVEs...</p>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="#" class="text-neon" style="font-size: 0.8rem;" onclick="showView('menu-section')">Regresar a Base</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. SECCIÓN DE RESULTADOS -->
+        <section id="results-section" style="width: 100%;">
+            <div id="capture-area" class="dashboard-layout">
+                <!-- Parte Superior: Tabla de Resultados -->
+                <div class="glass-panel" style="padding: 20px; width: 100%;">
+                    <div class="terminal-header">
+                        <h2 id="result-title" class="text-neon">RESULTADOS DEL ESCANEO: <span id="display-target">192.168.18.2</span></h2>
+                        <div id="scan-badge" class="tag-score score-low">BÁSICO</div>
+                    </div>
+                    
+                    <div class="data-table-container mt-30">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>PUERTO</th>
+                                    <th>SERVICIO</th>
+                                    <th>VERSIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-tbody">
+                                <!-- Datos inyectados -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Botones que se ocultarán en el PDF -->
+                    <div class="mt-30 no-print" style="display: flex; gap: 10px;">
+                        <button class="btn-cyber" style="padding: 10px 20px; font-size: 0.7rem;" onclick="downloadPDF()">Exportar PDF</button>
+                        <button class="btn-cyber secondary" style="padding: 10px 20px; font-size: 0.7rem;" onclick="showView('menu-section')">Nuevo Escaneo</button>
+                    </div>
+                </div>
+
+                <!-- Parte Inferior: Gráficos (Solo Avanzado) -->
+                <div id="advanced-side-panel" class="hidden" style="width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="glass-panel" style="padding: 20px;">
+                        <h3 style="font-size: 0.9rem; color: var(--clr-text-dim);">Distribución de Vulnerabilidades</h3>
+                        <div style="height: 300px;"><canvas id="cveChart"></canvas></div>
+                    </div>
+                    <div class="glass-panel" style="padding: 20px;">
+                        <h3 style="font-size: 0.9rem; color: var(--clr-text-dim);">Análisis de Riesgo Crítico</h3>
+                        <div style="height: 300px;"><canvas id="severityChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. OTRAS OPCIONES -->
+        <section id="other-options-section">
+            <div class="glass-panel" style="width: 600px; text-align: left;">
+                <h2 class="text-neon">> MEJORAS_SISTEMA</h2>
+                <div style="margin-top: 30px; font-family: 'JetBrains Mono'; line-height: 1.8;">
+                    <p class="text-cyan">[EJECUTANDO] proximas_mejoras.sh...</p>
+                    <p>> - Pentesting de Directorios Ocultos</p>
+                    <p>> - Análisis de Tecnologías Web (Wappalyzer)</p>
+                    <p>> - Módulo de Fuerza Bruta para SSH/HTTP</p>
+                    <p>> - Generador de Reportes de Inteligencia</p>
+                    <p style="margin-top: 20px; color: var(--clr-warning);">[ESTADO] FASE DE DESARROLLO - BETA v3.0</p>
+                </div>
+                <button class="btn-cyber mt-30" onclick="showView('menu-section')">VOLVER AL MENU</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
