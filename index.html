@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Catálogo Multiexpansión y Gestor de Colección de Cartas Pokémon TCG (Pokedexia): Caos Creciente, Evoluciones Prismáticas, Chispas Fulgurantes, Corona Astral, 151 y más. Sincronización en tiempo real con Supabase y gestión de perfiles de entrenador.">
+  <meta name="theme-color" content="#0b0f19">
+  <title>Pokémon TCG | Galería Multiexpansión & Gestor de Colecciones</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Estilos CSS Modulares -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/holo.css">
+  <link rel="stylesheet" href="css/modal.css">
+
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- ========================================================================
+         BARRA DE NAVEGACIÓN SUPERIOR CON PERFIL DE ENTRENADOR
+         ======================================================================== -->
+    <header class="app-header">
+      <nav class="top-navbar">
+        <div class="brand-badge" id="navBrandHome" style="cursor: pointer;" title="Ir al catálogo de expansiones">
+          <div class="pokeball-logo"></div>
+          <div class="brand-titles">
+            <h1>POKÉMON TCG</h1>
+            <p id="topNavSubtitle">Catálogo Multiexpansión Oficial</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Botón Navegación a Catálogo de Expansiones -->
+          <button id="btnNavExpansions" class="btn btn-secondary" title="Ver todas las expansiones">
+            <span>🎴 Expansiones</span>
+          </button>
+
+          <!-- Perfil de Entrenador Activo -->
+          <button id="btnTrainerProfile" class="btn-trainer-profile" title="Ver perfil o cambiar de entrenador">
+            <span class="trainer-avatar-mini" id="headerUserAvatar">🧢</span>
+            <span id="headerUsername">Entrenador</span>
+            <span class="trainer-badge-pill" id="headerUserStats">0 cartas</span>
+          </button>
+
+          <!-- Cambiar Usuario -->
+          <button id="btnLogoutUser" class="btn btn-secondary" style="padding: 0.5rem 0.75rem;" title="Cambiar usuario o cerrar sesión">
+            <span>🔄 Cambiar Usuario</span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <!-- ========================================================================
+         VISTA 1: CATÁLOGO DE TODAS LAS EXPANSIONES (EXPANSIONS HUB)
+         ======================================================================== -->
+    <section class="expansions-hub-section" id="expansionsSection">
+      <div class="expansions-hub-header">
+        <h2 class="expansions-hub-title">EXPANSIONES POKÉMON TCG</h2>
+        <p class="expansions-hub-subtitle">
+          Colección canónica de expansiones oficiales de la era <strong>Megaevolución</strong> y aniversarios Pokémon. Selecciona cualquier set para explorar sus cartas, inspeccionar estadísticas y registrar tu colección.
+        </p>
+
+        <!-- Filtros por Serie -->
+        <div class="series-filter-tabs">
+          <button class="series-tab-btn active" data-series="all">Todas las Expansiones (10)</button>
+          <button class="series-tab-btn" data-series="Megaevolución">Serie Megaevolución (7)</button>
+          <button class="series-tab-btn" data-series="Escarlata y Púrpura">Escarlata y Púrpura (3)</button>
+        </div>
+      </div>
+
+      <!-- Grilla de Tarjetas de Expansión -->
+      <div class="expansions-grid" id="expansionsGridContainer">
+        <!-- Inyectado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         VISTA 2: GALERÍA Y GESTOR DE CARTAS DE LA EXPANSIÓN SELECCIONADA
+         ======================================================================== -->
+    <div id="cardsGallerySection" style="display: none;">
+      
+      <!-- Botón Volver a Expansiones -->
+      <button id="btnBackToExpansions" class="btn-back-expansions">
+        <span>← Volver a Expansiones</span>
+      </button>
+
+      <!-- Hero Banner Dinámico de la Expansión -->
+      <section class="hero-banner" id="expansionHeroBanner">
+        <div class="hero-content">
+          <div class="hero-tags">
+            <span class="badge-tag set-code" id="heroSetCode">CRI / ME04</span>
+            <span class="badge-tag release-date" id="heroReleaseDate">21 Mayo 2026</span>
+          </div>
+          <h2 id="heroExpansionTitle">Megaevolución: Caos Creciente</h2>
+          <p class="hero-description" id="heroExpansionDesc">
+            Una amenaza sin precedentes asola Ciudad Luminalia tras la aparición del poder ancestral de la Flor Eterna y Mega-Floette ex. Los defensores de Kalos se alzan en batalla.
+          </p>
+        </div>
+
+        <!-- Tarjeta de Progreso de Colección -->
+        <div class="collection-stats-card">
+          <div class="stats-header">
+            <span class="stats-title">Progreso de Colección</span>
+            <span class="stats-percent" id="statProgressPercent">0.0%</span>
+          </div>
+
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="statProgressBarFill"></div>
+          </div>
+
+          <div class="stats-grid-mini">
+            <div class="mini-stat-item">
+              <div class="mini-stat-val" id="statOwnedCount">0 / 0</div>
+              <div class="mini-stat-label">Coleccionadas</div>
+            </div>
+            <div class="mini-stat-item">
+              <div class="mini-stat-val" id="statMissingCount" style="color: #f59e0b;">0</div>
+              <div class="mini-stat-label">Faltantes</div>
+            </div>
+            <div class="mini-stat-item">
+              <div class="mini-stat-val" id="statTotalCopies" style="color: #10b981;">0</div>
+              <div class="mini-stat-label">Copias Totales</div>
+            </div>
+            <div class="mini-stat-item">
+              <div class="mini-stat-val" id="statFavoritesCount" style="color: #ef4444;">0</div>
+              <div class="mini-stat-label">Favoritas</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel de Control y Filtros -->
+      <section class="control-panel">
+        <!-- Buscador y Pestañas Rápidas -->
+        <div class="search-and-toggles">
+          <div class="search-box-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar carta por nombre (ej. Pikachu, Charizard, Greninja), ataque o número..." autocomplete="off">
+          </div>
+
+          <div class="quick-filter-tabs">
+            <button class="tab-btn active" data-filter="all">Todas</button>
+            <button class="tab-btn" data-filter="owned">✓ En Colección</button>
+            <button class="tab-btn" data-filter="missing">❌ Faltantes</button>
+            <button class="tab-btn" data-filter="favorites">❤️ Favoritas</button>
+            <button class="tab-btn" data-filter="wishlist">⭐ Deseos</button>
+          </div>
+        </div>
+
+        <!-- Filtro por Elemento / Tipo -->
+        <div class="element-filters-row">
+          <div class="filter-section-title">Filtrar por Elemento / Energía Pokémon</div>
+          <div class="element-chips-list" id="elementChipsContainer">
+            <!-- Chips renderizados dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Filtro por Nivel de Rareza (Guía Oficial de Rarezas TCG) -->
+        <div class="rarity-filters-row" style="margin-bottom: 1.25rem;">
+          <div class="filter-section-title">Filtrar por Símbolo y Nivel de Rareza Oficial (Guía Pokémon TCG)</div>
+          <div class="element-chips-list" id="rarityChipsContainer">
+            <!-- Chips de rareza renderizados dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Filtros Secundarios (Rareza, Orden y Vista) -->
+        <div class="secondary-filters-row">
+          <div class="filter-group-inline">
+            <label for="raritySelect" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Rareza:</label>
+            <select id="raritySelect" class="select-control">
+              <option value="Todas">Todas las Rarezas</option>
+              <option value="Megaevolución ex">Megaevolución ex</option>
+              <option value="Doble Rara ex">Doble Rara ex</option>
+              <option value="Rara Ilustración Especial">Rara Ilustración Especial (SIR)</option>
+              <option value="Rara Ilustración">Rara Ilustración (IR)</option>
+              <option value="Ultra Rara">Ultra Rara (UR Dorada)</option>
+              <option value="Rara">Rara Holo</option>
+              <option value="Infrecuente">Infrecuente</option>
+              <option value="Común">Común</option>
+            </select>
+          </div>
+
+          <div class="filter-group-inline">
+            <label for="sortSelect" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Ordenar por:</label>
+            <select id="sortSelect" class="select-control">
+              <option value="number_asc">Número de Carta (Ascendente)</option>
+              <option value="number_desc">Número de Carta (Descendente)</option>
+              <option value="name_asc">Nombre (A - Z)</option>
+              <option value="name_desc">Nombre (Z - A)</option>
+              <option value="hp_desc">Puntos de Salud (PS Mayor a Menor)</option>
+              <option value="hp_asc">Puntos de Salud (PS Menor a Mayor)</option>
+            </select>
+          </div>
+
+          <div class="filter-group-inline">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Vista:</span>
+            <div class="view-mode-buttons">
+              <button id="viewGridBtn" class="view-btn active" title="Vista de Cuadrícula">▦ Grid</button>
+              <button id="viewListBtn" class="view-btn" title="Vista de Lista">☰ Lista</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resultados y Acciones Masivas -->
+      <div class="results-header-bar">
+        <div class="results-count" id="resultsCount">
+          Cargando catálogo de cartas...
+        </div>
+        <div class="bulk-actions-group">
+          <button id="markAllBtn" class="btn-sm" title="Marcar todas como coleccionadas">✓ Marcar Todas</button>
+          <button id="clearAllBtn" class="btn-sm" title="Limpiar colección">✕ Desmarcar Todas</button>
+        </div>
+      </div>
+
+      <!-- Grilla Principal de Cartas Pokémon -->
+      <main class="cards-grid" id="cardsGrid">
+        <!-- Cartas inyectadas dinámicamente -->
+      </main>
+
+    </div> <!-- Fin cardsGallerySection -->
+
+  </div> <!-- Fin app-container -->
+
+  <!-- ==========================================================================
+       MODAL 1: INICIO DE SESIÓN / REGISTRO DE USUARIO (SOLO NOMBRE)
+       ========================================================================== -->
+  <div class="modal-overlay" id="userAuthModal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🎴 Acceso de Entrenador</span>
+        </div>
+        <button class="modal-close-btn" id="closeUserAuthModal" title="Cerrar modal">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.75rem 1.5rem;">
+        
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <div style="font-size: 3rem; margin-bottom: 0.25rem;">🧢</div>
+          <h3 style="font-size: 1.15rem; color: #fff; font-weight: 800;">Bienvenido a Pokémon TCG</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+            Ingresa tu nombre de usuario para iniciar sesión o registrar tu perfil:
+          </p>
+        </div>
+
+        <form id="authLoginForm" onsubmit="event.preventDefault();">
+          <div class="form-group">
+            <label class="form-label" for="authUsernameInput">Nombre de Usuario</label>
+            <input type="text" id="authUsernameInput" class="form-input" placeholder="Ej. Red, Ash, Cynthia, TuNombre..." maxlength="25" autocomplete="off" style="font-size: 1.1rem; padding: 0.85rem 1rem; text-align: center; font-weight: 700;">
+          </div>
+
+          <div id="authStatusMessage" style="margin-bottom: 1rem; font-size: 0.85rem; font-weight: 700; text-align: center;"></div>
+
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="submit" id="btnActionLogin" class="btn btn-supabase" style="flex: 1; padding: 0.85rem; font-weight: 800; font-size: 0.95rem;">
+              <span>▶ Iniciar Sesión</span>
+            </button>
+            <button type="button" id="btnActionRegister" class="btn btn-secondary" style="flex: 1; padding: 0.85rem; font-weight: 800; font-size: 0.95rem;">
+              <span>✨ Registrar</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Lista de perfiles guardados para acceso rápido -->
+        <div id="savedProfilesSection" style="margin-top: 1.75rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.25rem;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.75rem;">
+            Entrenadores registrados en este dispositivo:
+          </div>
+          <div class="profiles-list-container" id="profilesListContainer">
+            <!-- Inyectado dinámicamente -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 2: INSPECTOR DE CARTA (DETALLE COMPLETO)
+       ========================================================================== -->
+  <div class="modal-overlay" id="cardInspectorModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>Detalle de Carta Pokémon</span>
+        </div>
+        <button class="modal-close-btn" id="closeCardModal" title="Cerrar modal">&times;</button>
+      </div>
+      <div class="modal-body" id="inspectorContent">
+        <!-- Contenido detallado inyectado dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 3: CONFIGURACIÓN Y SINCRONIZACIÓN CON SUPABASE
+       ========================================================================== -->
+  <div class="modal-overlay" id="supabaseModal">
+    <div class="modal-box" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>⚡ Base de Datos en Supabase</span>
+        </div>
+        <button class="modal-close-btn" id="closeSupabaseModal" title="Cerrar modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="supabase-banner-brand">
+          <svg class="supabase-icon-large" viewBox="0 0 109 113" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M63.7076 110.284C60.8481 113.885 55.0743 111.912 54.9808 107.314L53.9738 57.8863L99.4346 57.8863C106.516 57.8863 110.457 66.0706 105.992 71.5907L63.7076 110.284Z" fill="url(#paint0_linear)"/>
+            <path d="M45.297 2.71596C48.1565 -0.885443 53.9303 1.08779 54.0238 5.68599L54.3402 55.1137L9.56994 55.1137C2.48842 55.1137 -1.45239 46.9294 3.01258 41.4093L45.297 2.71596Z" fill="#3ECF8E"/>
+            <defs>
+              <linearGradient id="paint0_linear" x1="53.9738" y1="57.8863" x2="94.1611" y2="104.571" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#249361"/>
+                <stop offset="1" stop-color="#3ECF8E"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div>
+            <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 2px;">Sincronización en Tiempo Real</h3>
+            <p style="font-size: 0.8rem; color: #94a3b8;">Guarda las colecciones de cada usuario directamente en tu base de datos Supabase Postgres.</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="supabaseUrlInput">Project URL de Supabase</label>
+          <input type="text" id="supabaseUrlInput" class="form-input" placeholder="https://xyzprojectid.supabase.co">
+          <p class="form-help">Encuéntrala en tu panel de Supabase: Project Settings > API > Project URL</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="supabaseKeyInput">Anon Public API Key</label>
+          <input type="password" id="supabaseKeyInput" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+          <p class="form-help">Encuéntrala en Supabase: Project Settings > API > Project API keys (anon public)</p>
+        </div>
+
+        <div id="supabaseTestResult" style="margin-bottom: 1rem; font-size: 0.85rem; font-weight: 600;"></div>
+
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button id="btnSaveSupabase" class="btn btn-supabase" style="flex: 1;">
+            <span>Conectar y Probar Conexión</span>
+          </button>
+          <button id="btnSeedSupabase" class="btn btn-secondary">
+            <span>Sincronizar Catálogo a Supabase</span>
+          </button>
+        </div>
+
+        <!-- Script SQL para crear las tablas -->
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+            <label class="form-label" style="margin-bottom: 0;">Script SQL Completo (supabase_schema.sql)</label>
+            <button id="btnCopySql" class="btn-sm" title="Copiar código SQL">📋 Copiar SQL</button>
+          </div>
+          <pre class="sql-script-box" id="sqlSchemaPreview">-- Script SQL Completo para Supabase (tablas profiles, expansions, cards y user_cards)
+-- Ejecuta el archivo 'supabase_schema.sql' en tu Supabase SQL Editor:
+
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id TEXT PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    avatar_icon TEXT DEFAULT '🧢',
+    bio TEXT DEFAULT 'Entrenador oficial de Pokémon TCG',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.expansions (
+    id TEXT PRIMARY KEY,
+    code TEXT UNIQUE NOT NULL,
+    name_es TEXT NOT NULL,
+    name_en TEXT NOT NULL,
+    series TEXT NOT NULL,
+    total_cards INT NOT NULL,
+    release_date TEXT,
+    pokedexia_url TEXT,
+    banner_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.cards (
+    id TEXT PRIMARY KEY,
+    expansion_id TEXT NOT NULL REFERENCES public.expansions(id) ON DELETE CASCADE,
+    card_number TEXT NOT NULL,
+    name_es TEXT NOT NULL,
+    name_en TEXT NOT NULL,
+    element_type TEXT NOT NULL,
+    sub_type TEXT DEFAULT 'Básico',
+    hp INT,
+    rarity TEXT NOT NULL,
+    artist TEXT,
+    image_url TEXT NOT NULL,
+    market_price TEXT,
+    attacks JSONB DEFAULT '[]'::jsonb,
+    is_secret BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.user_cards (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id TEXT NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    card_id TEXT NOT NULL REFERENCES public.cards(id) ON DELETE CASCADE,
+    is_owned BOOLEAN DEFAULT false,
+    quantity INT DEFAULT 0,
+    is_wishlist BOOLEAN DEFAULT false,
+    is_favorite BOOLEAN DEFAULT false,
+    notes TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(user_id, card_id)
+);</pre>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts de la Aplicación en Orden de Dependencia -->
+  <script src="js/expansionsData.js"></script>
+  <script src="js/cardsData.js"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/authManager.js"></script>
+  <script src="js/collectionManager.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
